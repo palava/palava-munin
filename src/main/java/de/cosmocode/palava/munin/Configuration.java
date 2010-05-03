@@ -110,8 +110,8 @@ public class Configuration
 		{
 			for (Iterator it = entrySet().iterator(); it.hasNext();)
 			{
-				Map.Entry entry = (Entry) it.next();
-				out.println(fieldname + '.' + entry.getKey() + " " + entry.getValue());
+				//Map.Entry entry = (Entry) it.next();
+				//out.println(fieldname + '.' + entry.getKey() + " " + entry.getValue());
 			}
 		}
 

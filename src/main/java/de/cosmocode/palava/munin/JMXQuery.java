@@ -18,21 +18,9 @@ package de.cosmocode.palava.munin;
 
 import java.io.IOException;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import javax.management.Attribute;
-import javax.management.InstanceNotFoundException;
-import javax.management.IntrospectionException;
-import javax.management.MBeanAttributeInfo;
-import javax.management.MBeanInfo;
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
+import javax.management.*;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -98,7 +86,7 @@ public class JMXQuery
 	{
 		if (config == null)
 		{
-			listAll();
+			//listAll();
 		}
 		else
 		{
@@ -158,32 +146,9 @@ public class JMXQuery
 	}
 
 	@SuppressWarnings("unchecked")
-	private void listAll() throws IOException, InstanceNotFoundException, IntrospectionException, ReflectionException
+	private void listAll() throws IOException, JMException
 	{
-		Set<ObjectName> mbeans = connection.queryNames(null, null);
-		for (ObjectName name : mbeans)
-		{
-			MBeanInfo info = connection.getMBeanInfo(name);
-			MBeanAttributeInfo[] attrs = info.getAttributes();
-			String[] attrNames = new String[attrs.length];
-			for (int i = 0; i < attrs.length; i++)
-			{
-				attrNames[i] = attrs[i].getName();
-			}
-			try
-			{
-				List<Attribute> attributes = connection.getAttributes(name, attrNames);
-				for (Attribute attribute : attributes)
-				{
-					output(name.getCanonicalName() + "%" + attribute.getName(), attribute.getValue());
-				}
-			} 
-			catch (Exception e)
-			{
-				System.err.println("error getting " + name + ":" + e.getMessage());
-			}
 
-		}
 	}
 
 	private String format(Object value)
