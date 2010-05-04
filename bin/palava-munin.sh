@@ -15,12 +15,14 @@
 # limitations under the License.
 #
 
+# This plugin is inspired by the org.munin.JMXQuery plugin.
+
 #
 # Wildcard-plugin to monitor Java JMX (http://java.sun.com/jmx) attributes.
 # To monitor a # specific set of JMX attributes, 
 # link <config_name> to this file. E.g.
 #
-#    ln -s /opt/palava-munin/bin/palava-munin.sh /etc/munin/plugins/myapp_java_threads
+#    ln -s /opt/palava-munin/bin/palava-munin.sh /etc/munin/plugins/MyApp_java_threads
 #
 
 # ...will monitor Java thread count, assuming java_threads.conf file is located in
@@ -36,7 +38,7 @@
 # with no authentication credentials
 # It can be changed by specifying parameters in  /etc/munin/plugin-conf.d/munin-node
 #
-# [myapp_*]
+# [MyApp_*]
 # env.jmxurl service:jmx:rmi:///jndi/rmi://localhost:1616/jmxrmi
 # env.jmxuser monitorRole
 # env.jmxpass QED
@@ -46,18 +48,27 @@
 
 # who are we?
 ME="$(readlink $0)"
-if [ -z "$ME" ]; then
-    echo "You cannot call me directly" >&2
-    exit 1
-fi
 
 # and what do we want?
-APPNAME="$(basename $0 | cut -d'_' -f1)"
-CONFIGNAME="$(basename $0 | cut -d'_' -f2-).conf"
+if [ ! -z "$ME" ]; then
+    APPNAME="$(basename $0 | cut -d'_' -f1)"
+    CONFIGNAME="$(basename $0 | cut -d'_' -f2-).conf"
 
-# we're in bin/ so go one up
-cd $(dirname $(dirname $ME))
+    cd $(dirname $(dirname $ME))
 
+    if [ ! -r "conf/$CONFIGNAME" ]; then
+        echo "Configuration file not available"
+        exit 1
+    fi
+    CONFIG="--conf conf/$CONFIGNAME"
+else
+    APPNAME=none
+    CONFIGNAME=
+
+    cd $(dirname $(dirname $0))
+
+    CONFIG=
+fi
 
 # settings from munin
 if [ -z "$jmxurl" ]; then
@@ -70,12 +81,6 @@ if [ "$jmxuser" != "" ]; then
     CREDS="--user=$jmxuser --password=$jmxpass"
 fi
 
-# this really should be there
-if [ ! -r "conf/$CONFIGNAME" ]; then
-    echo "Configuration file not available"
-    exit 1
-fi
-
 if [ "$1" = "config" ]; then
     DUMP_CONFIG="--dump-config"
 else
@@ -83,5 +88,5 @@ else
 fi
 
 # how to execute java
-java -cp 'lib/*' de.cosmocode.palava.munin.Main --app $APPNAME --url $SERVICE $CREDS --conf conf/$CONFIGNAME $DUMP_CONFIG
+java -cp 'lib/*' de.cosmocode.palava.munin.Main --app $APPNAME --url $SERVICE $CREDS $CONFIG $DUMP_CONFIG
 exit $?

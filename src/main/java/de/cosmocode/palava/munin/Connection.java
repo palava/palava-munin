@@ -16,10 +16,12 @@
 
 package de.cosmocode.palava.munin;
 
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.management.*;
+import javax.management.openmbean.CompositeDataSupport;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
@@ -70,21 +72,21 @@ public class Connection {
         connector.close();
     }
 
-    public Map<String,Object> query(ConfigurationFile config) throws JMException, IOException {
+    public Map<String,FormattedValue> query(ConfigurationFile config) throws JMException, IOException {
         LOG.info("Querying MBeans for {} statistic...", config.getStatistic().getTitle());
-        Map<String,Object> results = new HashMap<String,Object>();
+        Map<String,FormattedValue> results = Maps.newHashMap();
         for (ConfiguredGraph graph: config.getStatistic().getGraphs()) {
             LOG.debug("Getting attribute {} of object {}...", graph.getJmxAttributeName(), graph.getJmxObjectName());
             Object value = connection.getAttribute(graph.getJmxObjectName(), graph.getJmxAttributeName());
             LOG.trace("Got {}", value);
-            results.put(graph.getTitle() + ".value", value);
+            setResult(results, graph.getTitle(), value, graph.getJmxAttributeKey());
         }
         return results;
     }
 
-    public Map<String, Object> queryAll() throws IOException, JMException {
+    public Map<String, FormattedValue> queryAll() throws IOException, JMException {
         LOG.info("Querying all MBeans and their attributes...");
-        Map<String,Object> results = new HashMap<String,Object>();
+        Map<String,FormattedValue> results = Maps.newHashMap();
         Set<ObjectName> mbeans = connection.queryNames(null, null);
 		for (ObjectName name : mbeans) {
 			MBeanInfo mbeanInfo = connection.getMBeanInfo(name);
@@ -92,13 +94,28 @@ public class Connection {
             for (MBeanAttributeInfo attributeInfo: mbeanInfo.getAttributes()) {
                 attributeNames.add(attributeInfo.getName());
             }
-            
+
             AttributeList attributes = connection.getAttributes(name, attributeNames.toArray(new String[]{}));
             for (Attribute attribute: attributes.asList()) {
-                results.put(name.getCanonicalName() + " [" + attribute.getName() + "]", attribute.getValue());
+                setResult(results, name.getCanonicalName() + "%" + attribute.getName(), attribute.getValue(), null);
             }
 		}
         return results;
+    }
+
+    private void setResult(Map<String, FormattedValue> results, String title, Object value, String key) {
+        if (value instanceof CompositeDataSupport) {
+            CompositeDataSupport cds = (CompositeDataSupport) value;
+            if (key != null) {
+                results.put(title, new FormattedValue(cds.get(key)));
+            } else {
+                for (String k: cds.getCompositeType().keySet()) {
+                    results.put(title + "." + k, new FormattedValue(cds.get(k)));
+                }
+            }
+        } else {
+            results.put(title, new FormattedValue(value));
+        }
     }
 
     @Override

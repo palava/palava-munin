@@ -17,6 +17,7 @@
 package de.cosmocode.palava.munin;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,21 +36,27 @@ public class ConfiguredStatistic {
 
     private String title;
 
-    private String vlabel;
-
-    private String category;
-
     private List<ConfiguredGraph> graphs = new ArrayList<ConfiguredGraph>();
+
+    private Map<String,String> unused = Maps.newHashMap();
+    private String app;
 
 
     public ConfiguredStatistic(String app, Map<String, String> options) throws MalformedObjectNameException {
-        title = Preconditions.checkNotNull(options.get("graph_title"), "graph_title");
-        vlabel = Preconditions.checkNotNull(options.get("graph_vlabel"), "graph_vlabel");
-        category = Preconditions.checkNotNull(options.get("graph_category"), "graph_category");
+        for (Map.Entry<String,String> entry: options.entrySet()) {
+            if (entry.getKey().startsWith("graph_")) {
+                unused.put(entry.getKey(), entry.getValue());
+            }
+        }
 
-        category = category + ": " + app;
+        this.app = Preconditions.checkNotNull(app, "app");
+        unused.remove("graph_category");
+
+        title = Preconditions.checkNotNull(options.get("graph_title"), "graph_title");
+        unused.remove("graph_title");
 
         String order = Preconditions.checkNotNull(options.get("graph_order"), "graph_order");
+        unused.remove("graph_order");
 
         StringTokenizer tokens = new StringTokenizer(order, " ");
         while (tokens.hasMoreTokens()) {
@@ -63,12 +70,8 @@ public class ConfiguredStatistic {
         return title;
     }
 
-    public String getVLabel() {
-        return vlabel;
-    }
-
-    public String getCategory() {
-        return category;
+    public String getApp() {
+        return app;
     }
 
     public List<ConfiguredGraph> getGraphs() {
@@ -77,8 +80,7 @@ public class ConfiguredStatistic {
 
     public String dump() {
         String out = "graph_title " + title + "\n";
-        out = out + "graph_vlabel " + vlabel + "\n";
-        out = out + "graph_category " + category + "\n";
+        out += "graph_category " + app + "\n";
 
         String order = null;
         for (ConfiguredGraph graph: getGraphs()) {
@@ -88,12 +90,14 @@ public class ConfiguredStatistic {
                 order = order + " " + graph.getTitle();
             }
         }
-        out = out + "graph_order " + order + "\n";
-        out = out + "\n";
+        out += "graph_order " + order + "\n";
+
+        for (Map.Entry<String,String> entry: unused.entrySet()) {
+            out += entry.getKey() + " " + entry.getValue() + "\n";
+        }
 
         for (ConfiguredGraph graph: getGraphs()) {
-            out = out + graph.dump();
-            out = out + "\n";
+            out += graph.dump();
         }
         return out;
     }

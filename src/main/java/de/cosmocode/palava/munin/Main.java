@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.management.JMException;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -69,7 +71,7 @@ public class Main {
 
         if (!options.isDumpConfig()) {
             try {
-                Map<String,Object> results;
+                Map<String,FormattedValue> results;
 
                 connection.connect();
 
@@ -78,8 +80,8 @@ public class Main {
                 } else {
                     results = connection.queryAll();
                 }
-                for (Map.Entry<String,Object> result: results.entrySet()) {
-                    System.out.println(result.getKey() + " = " + result.getValue());
+                for (Map.Entry<String,FormattedValue> result: results.entrySet()) {
+                    System.out.println(result.getKey() + ".value " + result.getValue().toString());
                 }
                 connection.disconnect();
             } catch (JMException e) {
@@ -90,7 +92,7 @@ public class Main {
         } else {
             // dump the configuration file
             LOG.debug("Dumping configuration file {}", config.getFile());
-            System.out.println(config.getStatistic().dump());
+            System.out.print(config.getStatistic().dump());
         }
     }
 }

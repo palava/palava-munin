@@ -36,15 +36,15 @@ public class ConfiguredGraph {
 
     private String title;
 
-    private String label;
-
     private ObjectName jmxObjectName;
-
     private String jmxAttributeName;
+    private String jmxAttributeKey;
+
+    private Map<String, String> unused;
 
 
-    public ConfiguredGraph(String graph_title, Map<String, String> options) throws MalformedObjectNameException {
-        title = graph_title;
+    public ConfiguredGraph(String title, Map<String, String> options) throws MalformedObjectNameException {
+        this.title = title;
 
         // find options for me
         Map<String,String> goptions = Maps.newHashMap();
@@ -59,19 +59,21 @@ public class ConfiguredGraph {
                 }
             }
         }
+        unused = goptions;
 
         // get them
-        label = Preconditions.checkNotNull(goptions.get("label"), "label");
         jmxObjectName = new ObjectName(Preconditions.checkNotNull(goptions.get("jmxObjectName"), "jmxObjectName"));
+        unused.remove("jmxObjectName");
+
         jmxAttributeName = Preconditions.checkNotNull(goptions.get("jmxAttributeName"), "jmxAttributeName");
+        unused.remove("jmxAttributeName");
+
+        jmxAttributeKey = goptions.get("jmxAttributeKey"); // can be unset
+        unused.remove("jmxAttributeKey");
     }
 
     public String getTitle() {
         return title;
-    }
-
-    public String getLabel() {
-        return label;
     }
 
     public ObjectName getJmxObjectName() {
@@ -82,10 +84,15 @@ public class ConfiguredGraph {
         return jmxAttributeName;
     }
 
+    public String getJmxAttributeKey() {
+        return jmxAttributeKey;
+    }
+
     public String dump() {
-        String out = title + ".label " + label + "\n";
-        out = out + title + ".jmxObjectName " + jmxObjectName + "\n";
-        out = out + title + ".jmxAttributeName " + jmxAttributeName + "\n";
+        String out = "";
+        for (Map.Entry<String,String> entry: unused.entrySet()) {
+            out += title + "." + entry.getKey() + " " + entry.getValue() + "\n";
+        }
         return out;
     }
 }
