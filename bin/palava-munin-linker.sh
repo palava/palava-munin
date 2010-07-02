@@ -50,13 +50,28 @@ for conf in $(ls conf); do
     if [ ! -z "$*" ]; then
         do=false
         for group in $*; do
-            if [ ! -z "$(echo $key | grep "^${group}_")" ]; then
+        	if [ $key = $group ]; then
+                do=true
+                break
+        	elif [ ! -z "$(echo $key | grep "^${group}_")" ]; then
                 do=true
                 break
             fi
         done
     fi
 
-    [ $do = true ] && ln -sv $DIR/bin/palava-munin.sh ${ETC}/${APP}_${key}
+	if [ $do = true ]; then
+		target=${ETC}/${APP}_${key}
+		ln -s $DIR/bin/palava-munin.sh $target
+		if [ $? -eq 0 ] && [ ! -z "$jmxurl" ]; then
+			$target 2>/dev/null >/dev/null
+			if [ $? -ne 0 ]; then
+				echo "Mbean for $target is not working properly, ignoring file"
+				rm -f $target
+				continue
+			fi
+		fi
+		echo "Successfully linked $target"
+	fi
 
 done
