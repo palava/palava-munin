@@ -16,17 +16,16 @@
 
 package de.cosmocode.palava.munin;
 
+import java.io.IOException;
+import java.util.Map;
+
+import javax.management.JMException;
+
 import org.apache.log4j.Level;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.management.JMException;
-import java.io.IOException;
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * @author Tobias Sarnowski

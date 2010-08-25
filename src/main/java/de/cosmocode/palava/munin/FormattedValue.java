@@ -16,12 +16,11 @@
 
 package de.cosmocode.palava.munin;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.Locale;
 
 /**
  * @author Tobias Sarnowski

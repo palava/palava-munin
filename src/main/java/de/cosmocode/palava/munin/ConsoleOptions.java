@@ -16,11 +16,11 @@
 
 package de.cosmocode.palava.munin;
 
+import java.io.File;
+
 import org.kohsuke.args4j.Option;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.File;
 
 /**
  * @author Tobias Sarnowski
