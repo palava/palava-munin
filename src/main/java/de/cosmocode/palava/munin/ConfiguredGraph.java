@@ -21,18 +21,15 @@ import java.util.Map;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 /**
+ * 
+ * 
  * @author Tobias Sarnowski
  */
 public class ConfiguredGraph {
-    private static final Logger LOG = LoggerFactory.getLogger(ConfiguredGraph.class);
-
 
     private String title;
 
@@ -47,14 +44,15 @@ public class ConfiguredGraph {
         this.title = title;
 
         // find options for me
-        Map<String,String> goptions = Maps.newHashMap();
-        for (Map.Entry<String,String> entry: options.entrySet()) {
-            int idx;
-            String key = entry.getKey();
-            if ((idx = key.indexOf(".")) > 0) {
-                String major = key.substring(0, idx);
+        final Map<String, String> goptions = Maps.newHashMap();
+        for (Map.Entry<String, String> entry : options.entrySet()) {
+            final String key = entry.getKey();
+            final int idx = key.indexOf(".");
+            
+            if (idx > 0) {
+                final String major = key.substring(0, idx);
                 if (major.equals(title)) {
-                    String minor = key.substring(idx + 1);
+                    final String minor = key.substring(idx + 1);
                     goptions.put(minor, entry.getValue());
                 }
             }
@@ -68,7 +66,9 @@ public class ConfiguredGraph {
         jmxAttributeName = Preconditions.checkNotNull(goptions.get("jmxAttributeName"), "jmxAttributeName");
         unused.remove("jmxAttributeName");
 
-        jmxAttributeKey = goptions.get("jmxAttributeKey"); // can be unset
+        // can be unset
+        jmxAttributeKey = goptions.get("jmxAttributeKey");
+        
         unused.remove("jmxAttributeKey");
     }
 
@@ -89,10 +89,16 @@ public class ConfiguredGraph {
     }
 
     public String dump() {
-        String out = "";
-        for (Map.Entry<String,String> entry: unused.entrySet()) {
-            out += title + "." + entry.getKey() + " " + entry.getValue() + "\n";
+        final StringBuilder b = new StringBuilder();
+        for (Map.Entry<String, String> entry : unused.entrySet()) {
+            b.append(title);
+            b.append(".");
+            b.append(entry.getKey());
+            b.append(" ");
+            b.append(entry.getValue());
+            b.append("\n");
         }
-        return out;
+        return b.toString();
     }
+   
 }

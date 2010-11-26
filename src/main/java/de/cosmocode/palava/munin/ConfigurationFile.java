@@ -25,31 +25,29 @@ import java.util.Map;
 
 import javax.management.MalformedObjectNameException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.google.common.base.Preconditions;
 
 /**
+ * Reader and value object for munin configuration files.
+ * 
  * Format of the configuration file is:
  * <key> <value>
  *
  * @author Tobias Sarnowski
  */
 public class ConfigurationFile {
-    private static final Logger LOG = LoggerFactory.getLogger(ConfigurationFile.class);
-
 
     private File file;
 
-    private Map<String,String> options = new HashMap<String,String>();
+    private Map<String, String> options = new HashMap<String, String>();
 
     private ConfiguredStatistic statistic;
-
 
     public ConfigurationFile(String app, File file) throws IOException {
         this.file = file;
 
         // parse it to map
-        BufferedReader reader = new BufferedReader(new FileReader(file));
+        final BufferedReader reader = new BufferedReader(new FileReader(file));
         String line;
         while ((line = reader.readLine()) != null) {
             parse(line.trim());
@@ -64,16 +62,15 @@ public class ConfigurationFile {
     }
 
     private void parse(String line) {
-        // parse key-value
         if (line.length() == 0) {
             return;
         }
-        int idx;
-        if ((idx = line.indexOf(" ")) < 0) {
-            throw new IllegalArgumentException("invalid configuration line:  " + line);
-        }
-        String key = line.substring(0, idx);
-        String value = line.substring(idx + 1);
+        
+        final int index = line.indexOf(" ");
+        Preconditions.checkArgument(index >= 0, "invalid configuration line:  %s", line);
+        
+        final String key = line.substring(0, index);
+        final String value = line.substring(index + 1);
 
         options.put(key, value);
     }
@@ -89,4 +86,5 @@ public class ConfigurationFile {
     public Map<String, String> getOptions() {
         return options;
     }
+    
 }
