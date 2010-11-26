@@ -23,10 +23,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * An object which uses some sophisticated formatting action
+ * in {@link #toString()}.
+ * 
  * @author Tobias Sarnowski
  */
 public class FormattedValue {
-    private static final Logger LOG = LoggerFactory.getLogger(FormattedValue.class);
 
     private Object value;
 
@@ -37,35 +39,32 @@ public class FormattedValue {
     @Override
     public String toString() {
         if (value == null) {
-			return "null";
-
-		} else if (value instanceof String) {
-			return (String) value;
-
-		} else if (value instanceof Number) {
-			NumberFormat f = NumberFormat.getInstance(Locale.US);
-			f.setMaximumFractionDigits(2);
-			f.setGroupingUsed(false);
-			return f.format(value);
-
-		} else if (value instanceof Object[]) {
-            String concatinated = null;
-			for (Object obj: ((Object[])value)) {
-                FormattedValue v = new FormattedValue(obj);
-                if (concatinated != null) {
-                    concatinated += " " + v.toString();
+            return "null";
+        } else if (value instanceof String) {
+            return (String) value;
+        } else if (value instanceof Number) {
+            final NumberFormat format = NumberFormat.getInstance(Locale.US);
+            format.setMaximumFractionDigits(2);
+            format.setGroupingUsed(false);
+            return format.format(value);
+        } else if (value instanceof Object[]) {
+            final StringBuilder b = new StringBuilder();
+            for (Object obj : (Object[]) value) {
+                final FormattedValue v = new FormattedValue(obj);
+                if (b.length() == 0) {
+                    b.append(v);
                 } else {
-                    concatinated = v.toString();
+                    b.append(" ").append(v);
                 }
             }
-            return concatinated;
-
-		} else {
-		    return value.toString();
+            return b.toString();
+        } else {
+            return value.toString();
         }
     }
 
     public Object getValue() {
         return value;
     }
+    
 }

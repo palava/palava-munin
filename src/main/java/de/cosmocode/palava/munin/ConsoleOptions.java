@@ -23,10 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Options value object used by args4j.
+ * 
  * @author Tobias Sarnowski
  */
 final class ConsoleOptions {
-    private static final Logger LOG = LoggerFactory.getLogger(ConsoleOptions.class);
 
     @Option(name = "--app", required = true, usage = "Unique name of the monitored application")
     private String app;
@@ -43,7 +44,8 @@ final class ConsoleOptions {
     @Option(name = "--conf", required = false, usage = "The configuration file to use for statistic generation.")
     private File conf;
 
-    @Option(name = "--log", required = false, usage = "Default logging is WARN, can be set to ERROR, WARN, INFO, DEBUG and TRACE.")
+    @Option(name = "--log", required = false, 
+        usage = "Default logging is WARN, can be set to ERROR, WARN, INFO, DEBUG and TRACE.")
     private String log;
 
     @Option(name = "--dump-config", required = false, usage = "Dumps the given configuration file")
@@ -76,4 +78,5 @@ final class ConsoleOptions {
     public String getApp() {
         return app;
     }
+    
 }

@@ -16,36 +16,32 @@
 
 package de.cosmocode.palava.munin;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.management.MalformedObjectNameException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 /**
+ * A configured, dumpable statistic.
+ * 
  * @author Tobias Sarnowski
  */
-public class ConfiguredStatistic {
-    private static final Logger LOG = LoggerFactory.getLogger(ConfiguredStatistic.class);
+public class ConfiguredStatistic implements Dumpable {
 
+    private final String title;
 
-    private String title;
+    private final List<ConfiguredGraph> graphs = Lists.newArrayList();
 
-    private List<ConfiguredGraph> graphs = new ArrayList<ConfiguredGraph>();
-
-    private Map<String,String> unused = Maps.newHashMap();
-    private String app;
-
+    private final Map<String, String> unused = Maps.newHashMap();
+    private final String app;
 
     public ConfiguredStatistic(String app, Map<String, String> options) throws MalformedObjectNameException {
-        for (Map.Entry<String,String> entry: options.entrySet()) {
+        for (Map.Entry<String, String> entry : options.entrySet()) {
             if (entry.getKey().startsWith("graph_")) {
                 unused.put(entry.getKey(), entry.getValue());
             }
@@ -57,13 +53,13 @@ public class ConfiguredStatistic {
         title = Preconditions.checkNotNull(options.get("graph_title"), "graph_title");
         unused.remove("graph_title");
 
-        String order = Preconditions.checkNotNull(options.get("graph_order"), "graph_order");
+        final String order = Preconditions.checkNotNull(options.get("graph_order"), "graph_order");
         unused.remove("graph_order");
 
-        StringTokenizer tokens = new StringTokenizer(order, " ");
+        final StringTokenizer tokens = new StringTokenizer(order, " ");
         while (tokens.hasMoreTokens()) {
-            String graph_title = tokens.nextToken();
-            graphs.add(new ConfiguredGraph(graph_title, options));
+            final String graphTitle = tokens.nextToken();
+            graphs.add(new ConfiguredGraph(graphTitle, options));
         }
     }
 
@@ -80,12 +76,13 @@ public class ConfiguredStatistic {
         return graphs;
     }
 
+    @Override
     public String dump() {
         String out = "graph_title " + title + "\n";
         out += "graph_category " + app + "\n";
 
         String order = null;
-        for (ConfiguredGraph graph: getGraphs()) {
+        for (ConfiguredGraph graph : getGraphs()) {
             if (order == null) {
                 order = graph.getTitle();
             } else {
@@ -94,11 +91,11 @@ public class ConfiguredStatistic {
         }
         out += "graph_order " + order + "\n";
 
-        for (Map.Entry<String,String> entry: unused.entrySet()) {
+        for (Map.Entry<String, String> entry : unused.entrySet()) {
             out += entry.getKey() + " " + entry.getValue() + "\n";
         }
 
-        for (ConfiguredGraph graph: getGraphs()) {
+        for (ConfiguredGraph graph : getGraphs()) {
             out += graph.dump();
         }
         return out;

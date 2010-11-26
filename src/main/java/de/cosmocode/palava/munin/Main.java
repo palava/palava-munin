@@ -28,15 +28,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Main entry point.
+ * 
  * @author Tobias Sarnowski
  */
-public class Main {
+public final class Main {
+    
     private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    
+    private Main() {
+        
+    }
 
-    private static final ConsoleOptions options = new ConsoleOptions();
-
+    /**
+     * Runs this application.
+     *
+     * @since 1.0
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         // parse console parameters
+        final ConsoleOptions options = new ConsoleOptions();
         final CmdLineParser parser = new CmdLineParser(options);
 
         try {
@@ -47,11 +59,11 @@ public class Main {
         }
 
         // we manipulate log4j directly to support our --log configuration
-        org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
+        final org.apache.log4j.Logger logger = org.apache.log4j.Logger.getRootLogger();
         logger.setLevel(Level.toLevel(options.getLog()));
 
         // the connection to send
-        Connection connection = new Connection(options.getUrl(), options.getUser(), options.getPassword());
+        final Connection connection = new Connection(options.getUrl(), options.getUser(), options.getPassword());
         LOG.debug("Connection to use: {}", connection);
 
         // load the configuration file if one is given
@@ -68,30 +80,33 @@ public class Main {
             config = null;
         }
 
-        if (!options.isDumpConfig()) {
+        if (options.isDumpConfig()) {
+            // dump the configuration file
+            LOG.debug("Dumping configuration file {}", config.getFile());
+            System.out.print(config.getStatistic().dump());
+        } else {
             try {
-                Map<String,FormattedValue> results;
-
+                Map<String, FormattedValue> results;
+                
                 connection.connect();
-
-                if (config != null) {
-                    results = connection.query(config);
-                } else {
+                
+                if (config == null) {
                     results = connection.queryAll();
+                } else {
+                    results = connection.query(config);
                 }
-                for (Map.Entry<String,FormattedValue> result: results.entrySet()) {
+                
+                for (Map.Entry<String, FormattedValue> result : results.entrySet()) {
                     System.out.println(result.getKey() + ".value " + result.getValue().toString());
                 }
+                
                 connection.disconnect();
             } catch (JMException e) {
                 throw new IllegalStateException(e);
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
-        } else {
-            // dump the configuration file
-            LOG.debug("Dumping configuration file {}", config.getFile());
-            System.out.print(config.getStatistic().dump());
         }
     }
+    
 }

@@ -25,11 +25,11 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 
 /**
- * 
+ * A configured, dumpable graph.
  * 
  * @author Tobias Sarnowski
  */
-public class ConfiguredGraph {
+public class ConfiguredGraph implements Dumpable {
 
     private String title;
 
@@ -38,7 +38,6 @@ public class ConfiguredGraph {
     private String jmxAttributeKey;
 
     private Map<String, String> unused;
-
 
     public ConfiguredGraph(String title, Map<String, String> options) throws MalformedObjectNameException {
         this.title = title;
@@ -88,6 +87,7 @@ public class ConfiguredGraph {
         return jmxAttributeKey;
     }
 
+    @Override
     public String dump() {
         final StringBuilder b = new StringBuilder();
         for (Map.Entry<String, String> entry : unused.entrySet()) {
