@@ -15,7 +15,7 @@
   <version>1.3-SNAPSHOT</version>
 
   <scm>
-    <developerConnection>scm:svn:https://palava.svn.cosmocode.de/palava-munin/trunk</developerConnection>
+    <developerConnection>scm:git:git@github.com:palava/${project.artifactId}.git</developerConnection>
   </scm>
   <repositories>
     <repository>
