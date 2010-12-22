@@ -19,8 +19,6 @@ package de.cosmocode.palava.munin;
 import java.io.File;
 
 import org.kohsuke.args4j.Option;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Options value object used by args4j.

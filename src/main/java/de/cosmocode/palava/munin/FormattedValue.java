@@ -19,9 +19,6 @@ package de.cosmocode.palava.munin;
 import java.text.NumberFormat;
 import java.util.Locale;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * An object which uses some sophisticated formatting action
  * in {@link #toString()}.
